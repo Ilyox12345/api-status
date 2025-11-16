@@ -1,0 +1,11 @@
+name = "status"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+kv_namespaces = [
+  { binding = "BOT_CONFIG", id = "4629ac2ba949413c9a4e0e71f3823403" },
+  { binding = "BOT_STATUS", id = "5dd7c986ad2342b18f607fe92e1ad7c3" }
+]
+
+[vars]
+# Tu peux ajouter des clés secrètes ici si tu veux
