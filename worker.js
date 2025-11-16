@@ -3,14 +3,19 @@ export default {
     const url = new URL(request.url);
 
     try {
+
       // ============================
-      // ROUTE : /status
+      // 📌 ROUTE : /status
       // ============================
       if (url.pathname === "/status") {
+
+        // Lire maintenance dans KV
         const maintenance = await env.BOT_CONFIG.get("maintenance");
+
+        // Lire le dernier status envoyé par le bot
         const botStatus = await env.BOT_STATUS.get("status");
 
-        // Si le bot n’a jamais envoyé son status → offline
+        // Si aucun statut → bot hors-ligne
         if (!botStatus) {
           return new Response(JSON.stringify({
             online: false,
@@ -21,15 +26,39 @@ export default {
           });
         }
 
+        // Retourner les données du bot
         return new Response(botStatus, {
           headers: { "Content-Type": "application/json" }
         });
       }
 
+
       // ============================
-      // ROUTE : /admin/maintenance
+      // 📌 ROUTE : /update
+      // envoyée par TON BOT
+      // ============================
+      if (url.pathname === "/update") {
+
+        if (request.method !== "POST") {
+          return new Response("Method Not Allowed", { status: 405 });
+        }
+
+        const body = await request.json();
+
+        // Sauvegarde dans KV
+        await env.BOT_STATUS.put("status", JSON.stringify(body));
+
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+
+
+      // ============================
+      // 📌 ROUTE : /admin/maintenance
       // ============================
       if (url.pathname === "/admin/maintenance") {
+
         if (request.method !== "POST") {
           return new Response("Method Not Allowed", { status: 405 });
         }
@@ -55,26 +84,10 @@ export default {
         });
       }
 
+
       // ============================
-      // ROUTE : /update
-      // envoyée par ton bot Discord
+      // ❌ ROUTE NON TROUVÉE
       // ============================
-      if (url.pathname === "/update") {
-        if (request.method !== "POST") {
-          return new Response("Method Not Allowed", { status: 405 });
-        }
-
-        const body = await request.json();
-
-        // Stocker le status envoyé par ton bot
-        await env.BOT_STATUS.put("status", JSON.stringify(body));
-
-        return new Response(JSON.stringify({ success: true }), {
-          headers: { "Content-Type": "application/json" }
-        });
-      }
-
-      // Si aucune route ne correspond :
       return new Response("Not Found", { status: 404 });
 
     } catch (err) {
